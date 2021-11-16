@@ -1,6 +1,11 @@
-**Please note**: This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). It's very close to the original and merely provides some minor additions to the Ducky Script language:
+<h1>This is a fork...</h1>
+
+This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). It's very close to the original and merely provides some minor additions to the Ducky Script language and allows to run one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`).
+
+Changes to the Ducky Script language are:
 
 - importing other payloads through e.g. `IMPORT filename.dd`
+
 - setting keyboard locale __at runtime__ through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
 
 
@@ -42,10 +47,9 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 8. Be careful, if your device isn't in [setup mode](#setup-mode), the device will reboot and after half a second, the script will run.
 
-### Setup mode
+### Run vs Setup mode
 
-To edit the payload, enter setup mode by connecting the pin 1 (`GP0`) to pin 3 (`GND`), this will stop the pico-ducky from injecting the payload in your own machine.
-The easiest way to so is by using a jumper wire between those pins as seen bellow.
+Select which payload should be run by grounding either pin 1 (`GP0`), pin 2 (`GP1`), pin 4 (`GP3`), pin 5 (`GP4`) or pin 6 (`GP5`) to the ground pin 3 (`GND`). This will tell pico-ducky which of the 6 payload files to run. The easiest way to so is by using a jumper wire between those pins as seen below (in this case `GP0` is grounded therefore `payload0.dd` will be run). If neither pin is grounded, pico-ducky will be in setup-mode and execute no payload. You are free to modify your script without risking injecting any payloads.
 
 ![Setup mode with a jumper](images/setup-mode.png)
 

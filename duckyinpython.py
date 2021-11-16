@@ -116,8 +116,12 @@ def processDuckyScript(duckyScriptPath):
             parseLine(line)
             previousLine = line
         time.sleep(float(defaultDelay)/1000)
-
     print("Done")
+
+def isPinGrounded(pin):
+    checkPin = digitalio.DigitalInOut(pin)
+    checkPin.switch_to_input(pull=digitalio.Pull.UP)
+    return (not checkPin.value)
 
 kbd = Keyboard(usb_hid.devices)
 layout = KeyboardLayout(kbd)
@@ -125,15 +129,21 @@ layout = KeyboardLayout(kbd)
 # sleep at the start to allow the device to be recognized by the host computer
 time.sleep(.5)
 
-# check GP0 for setup mode
-# see setup mode for instructions
-progStatus = False
-progStatusPin = digitalio.DigitalInOut(GP0)
-progStatusPin.switch_to_input(pull=digitalio.Pull.UP)
-progStatus = not progStatusPin.value
 defaultDelay = 0
-if(progStatus == False):
-    # not in setup mode, inject the payload
-    processDuckyScript("payload.dd")
+
+# check GP0/GP1/GP2/GP3/GP4/GP5 for run mode
+if isPinGrounded(GP0):
+    processDuckyScript("payload0.dd")
+elif isPinGrounded(GP1):
+    processDuckyScript("payload1.dd")
+elif isPinGrounded(GP2):
+    processDuckyScript("payload2.dd")
+elif isPinGrounded(GP3):
+    processDuckyScript("payload3.dd")
+elif isPinGrounded(GP4):
+    processDuckyScript("payload4.dd")
+elif isPinGrounded(GP5):
+    processDuckyScript("payload5.dd")
 else:
+    # in setup mode
     print("Update your payload")
