@@ -1,3 +1,9 @@
+**Please note**: This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). It's very close to the original and merely provides some minor additions to the Ducky Script language:
+
+- importing other payloads through e.g. `IMPORT filename.dd`
+- setting keyboard locale __at runtime__ through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
+
+
 <h1 align="center">pico-ducky</h1>
 
 <div align="center">
