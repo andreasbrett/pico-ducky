@@ -49,7 +49,7 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 ### Run vs Setup mode
 
-Select which payload should be run by grounding either pin 1 (`GP0`), pin 2 (`GP1`), pin 4 (`GP3`), pin 5 (`GP4`) or pin 6 (`GP5`) to the ground pin 3 (`GND`). This will tell pico-ducky which of the 6 payload files to run. The easiest way to so is by using a jumper wire between those pins as seen below (in this case `GP0` is grounded therefore `payload0.dd` will be run). If neither pin is grounded, pico-ducky will be in setup-mode and execute no payload. You are free to modify your script without risking injecting any payloads.
+Select which payload should be run by grounding either pin 1 (`GP0`), pin 2 (`GP1`), pin 4 (`GP3`), pin 5 (`GP4`) or pin 6 (`GP5`) to the ground pin 3 (`GND`). This will tell pico-ducky which of the 6 payload files to run. The easiest way to do so is by using a jumper wire between those pins as seen below (in this case `GP0` is grounded therefore `payload0.dd` will be run). If neither pin is grounded, pico-ducky will be in setup-mode and execute no payload. You are then free to modify your script without risking injecting any payloads.
 
 ![Setup mode with a jumper](images/setup-mode.png)
 
