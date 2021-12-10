@@ -10,6 +10,7 @@ from adafruit_hid.keyboard import Keyboard
 mouseJigglerDelayMin = 1
 mouseJigglerDelayMax = 15
 mouseJigglerMovement = 10
+mouseJigglerLED = True
 
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
@@ -54,8 +55,19 @@ duckyCommands = {
 def pickInterval():
     return time.monotonic(), (random.randint(mouseJigglerDelayMin, mouseJigglerDelayMax))
 
+def blinkLED(duration, repeats=1):
+    if (mouseJigglerLED == True):
+        for i in range(repeats):
+            led.value = True
+            time.sleep(duration)
+            led.value = False
+            time.sleep(duration)
+
 def mouseJigglerLoop():
     from adafruit_hid.mouse import Mouse
+
+    # blink LED 6x (startup indicator)
+    blinkLED(0.08, 6)
 
     print("Running mouse jiggler")
     print(" > movement  =", mouseJigglerMovement, "px")
@@ -72,6 +84,9 @@ def mouseJigglerLoop():
             print("jiggling mouse", mouseJigglerMovement, "pixels")
             mouse.move(x=-mouseJigglerMovement, y=-mouseJigglerMovement)
             mouse.move(x=mouseJigglerMovement, y=mouseJigglerMovement)
+
+            # blink LED
+            blinkLED(0.15)
 
             # determine delay
             timestamp, interval = pickInterval()
