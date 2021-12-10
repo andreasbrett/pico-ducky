@@ -6,6 +6,11 @@
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
 
+# mouse jiggler configuration
+mouseJigglerDelayMin = 1
+mouseJigglerDelayMax = 15
+mouseJigglerMovement = 10
+
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 from adafruit_hid.keycode import Keycode
@@ -17,7 +22,10 @@ from adafruit_hid.keycode import Keycode
 
 import time
 import digitalio
+import random
 from board import *
+led = digitalio.DigitalInOut(LED)
+led.direction = digitalio.Direction.OUTPUT
 
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
@@ -31,6 +39,7 @@ duckyCommands = {
     'INSERT': Keycode.INSERT, 'NUMLOCK': Keycode.KEYPAD_NUMLOCK, 'PAGEUP': Keycode.PAGE_UP,
     'PAGEDOWN': Keycode.PAGE_DOWN, 'PRINTSCREEN': Keycode.PRINT_SCREEN, 'ENTER': Keycode.ENTER,
     'SCROLLLOCK': Keycode.SCROLL_LOCK, 'SPACE': Keycode.SPACE, 'TAB': Keycode.TAB,
+    'BACKSPACE': Keycode.BACKSPACE, 'DELETE': Keycode.DELETE,
     'A': Keycode.A, 'B': Keycode.B, 'C': Keycode.C, 'D': Keycode.D, 'E': Keycode.E,
     'F': Keycode.F, 'G': Keycode.G, 'H': Keycode.H, 'I': Keycode.I, 'J': Keycode.J,
     'K': Keycode.K, 'L': Keycode.L, 'M': Keycode.M, 'N': Keycode.N, 'O': Keycode.O,
@@ -41,6 +50,32 @@ duckyCommands = {
     'F8': Keycode.F8, 'F9': Keycode.F9, 'F10': Keycode.F10, 'F11': Keycode.F11,
     'F12': Keycode.F12,
 }
+
+def pickInterval():
+    return time.monotonic(), (random.randint(mouseJigglerDelayMin, mouseJigglerDelayMax))
+
+def mouseJigglerLoop():
+    from adafruit_hid.mouse import Mouse
+
+    print("Running mouse jiggler")
+    print(" > movement  =", mouseJigglerMovement, "px")
+    print(" > delay min =", mouseJigglerDelayMin, "second(s)")
+    print(" > delay max =", mouseJigglerDelayMax, "seconds")
+
+    mouse = Mouse(usb_hid.devices)
+    timestamp, interval = pickInterval()
+
+    print("waiting", interval, "seconds")
+    while True:
+        if (time.monotonic() - timestamp) > interval:
+            # move mouse up+left then back down+right
+            print("jiggling mouse", mouseJigglerMovement, "pixels")
+            mouse.move(x=-mouseJigglerMovement, y=-mouseJigglerMovement)
+            mouse.move(x=mouseJigglerMovement, y=mouseJigglerMovement)
+
+            # determine delay
+            timestamp, interval = pickInterval()
+            print("waiting", interval, "seconds")
 
 def loadLocale(locale):
     global KeyboardLayout, Keycode, layout
@@ -93,10 +128,14 @@ def parseLine(line):
         time.sleep(float(line[6:])/1000)
     elif(line[0:6] == "STRING"):
         sendString(line[7:])
+    elif(line[0:5] == "PRINT"):
+        print("[SCRIPT]: " + line[6:])
     elif(line[0:13] == "DEFAULT_DELAY"):
         defaultDelay = int(line[14:]) * 10
     elif(line[0:12] == "DEFAULTDELAY"):
         defaultDelay = int(line[13:]) * 10
+    elif(line[0:3] == "LED"):
+        led.value = not led.value
     elif(line[0:6] == "IMPORT"):
         processDuckyScript(line[7:])
     elif(line[0:6] == "LOCALE"):
@@ -136,7 +175,7 @@ time.sleep(.5)
 
 defaultDelay = 0
 
-# check GP0/GP1/GP2/GP3/GP4/GP5 for run mode
+# check GP0/GP1/GP2/GP3/GP4/GP5/GP6 for run mode
 if isPinGrounded(GP0):
     processDuckyScript("payload0.dd")
 elif isPinGrounded(GP1):
@@ -149,6 +188,8 @@ elif isPinGrounded(GP4):
     processDuckyScript("payload4.dd")
 elif isPinGrounded(GP5):
     processDuckyScript("payload5.dd")
+elif isPinGrounded(GP6):
+    mouseJigglerLoop()
 else:
     # in setup mode
     print("Update your payload")
