@@ -1,15 +1,21 @@
 <h1>This is a fork...</h1>
 
-This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). It's very close to the original and merely provides some minor additions to the Ducky Script language and allows to run one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`).
+This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). It's close to the original code...
+
+- providing additions to the Ducky Script language (see below)
+- allowing to run one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`)
+- allowing to run a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
 
 Changes to the Ducky Script language are:
 
 - importing other payloads through e.g. `IMPORT filename.dd`
-
 - setting keyboard locale __at runtime__ through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
-
-- running a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
-
+- sending mouse commands (movements, wheel action, clicks, presses and releases)
+  - `MOUSE MOVE $x $y` - moves the mouse pointer
+  - `MOUSE WHEEL $amount` - moves the mouse wheel (negative = toward the user, positive = away from the user)
+  - `MOUSE CLICK/PRESS/RELEASE LEFT [RIGHT] [MIDDLE]` - click, press or release one ore more buttons (e.g. `MOUSE PRESS LEFT RIGHT` would keep the left and right buttons pressed until issuing a `MOUSE RELEASE LEFT RIGHT` or `MOUSE RELEASEALL` command)
+  - `MOUSE RELEASEALL` - releases all pressed buttons
+  - these work great in scenarios where you want to mess with user's ability to e.g. close your shell by moving the mouse or to spookily move the mouse around ever so often
 
 <h1 align="center">pico-ducky</h1>
 

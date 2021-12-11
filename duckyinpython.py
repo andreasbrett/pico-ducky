@@ -5,6 +5,7 @@
 
 import usb_hid
 from adafruit_hid.keyboard import Keyboard
+from adafruit_hid.mouse import Mouse
 
 # mouse jiggler configuration
 mouseJigglerDelayMin = 1
@@ -40,7 +41,7 @@ duckyCommands = {
     'INSERT': Keycode.INSERT, 'NUMLOCK': Keycode.KEYPAD_NUMLOCK, 'PAGEUP': Keycode.PAGE_UP,
     'PAGEDOWN': Keycode.PAGE_DOWN, 'PRINTSCREEN': Keycode.PRINT_SCREEN, 'ENTER': Keycode.ENTER,
     'SCROLLLOCK': Keycode.SCROLL_LOCK, 'SPACE': Keycode.SPACE, 'TAB': Keycode.TAB,
-    'BACKSPACE': Keycode.BACKSPACE, 'DELETE': Keycode.DELETE,
+    'BACKSPACE': Keycode.BACKSPACE,
     'A': Keycode.A, 'B': Keycode.B, 'C': Keycode.C, 'D': Keycode.D, 'E': Keycode.E,
     'F': Keycode.F, 'G': Keycode.G, 'H': Keycode.H, 'I': Keycode.I, 'J': Keycode.J,
     'K': Keycode.K, 'L': Keycode.L, 'M': Keycode.M, 'N': Keycode.N, 'O': Keycode.O,
@@ -52,11 +53,15 @@ duckyCommands = {
     'F12': Keycode.F12,
 }
 
+mouseCommands = {
+    'LEFT': Mouse.LEFT_BUTTON, 'RIGHT': Mouse.RIGHT_BUTTON, 'MIDDLE': Mouse.MIDDLE_BUTTON
+}
+
 def pickInterval():
     return time.monotonic(), (random.randint(mouseJigglerDelayMin, mouseJigglerDelayMax))
 
 def blinkLED(duration, repeats=1):
-    if (mouseJigglerLED == True):
+    if mouseJigglerLED:
         for i in range(repeats):
             led.value = True
             time.sleep(duration)
@@ -64,8 +69,6 @@ def blinkLED(duration, repeats=1):
             time.sleep(duration)
 
 def mouseJigglerLoop():
-    from adafruit_hid.mouse import Mouse
-
     # blink LED 6x (startup indicator)
     blinkLED(0.08, 6)
 
@@ -74,7 +77,6 @@ def mouseJigglerLoop():
     print(" > delay min =", mouseJigglerDelayMin, "second(s)")
     print(" > delay max =", mouseJigglerDelayMax, "seconds")
 
-    mouse = Mouse(usb_hid.devices)
     timestamp, interval = pickInterval()
 
     print("waiting", interval, "seconds")
@@ -134,6 +136,31 @@ def runScriptLine(line):
 def sendString(line):
     layout.write(line)
 
+def getMouseButtons(line):
+    buttons = line.split(" ")
+    command = 0
+    for button in buttons:
+        command |= mouseCommands.get(button, None)
+    return command
+
+def mouseAction(line):
+    if(line[0:4] == "MOVE"):
+        coordinates = line[5:].split(" ")
+        moveX = int(coordinates[0])
+        moveY = int(coordinates[1])
+        mouse.move(x=moveX, y=moveY)
+    elif(line[0:5] == "WHEEL"):
+        amount = int(line[6:])
+        mouse.move(wheel=amount)
+    elif(line[0:5] == "CLICK"):
+        mouse.click(getMouseButtons(line[6:]))
+    elif(line[0:5] == "PRESS"):
+        mouse.press(getMouseButtons(line[6:]))
+    elif(line[0:7] == "RELEASE"):
+        mouse.release(getMouseButtons(line[8:]))
+    elif(line[0:10] == "RELEASEALL"):
+        mouse.release_all()
+
 def parseLine(line):
     global defaultDelay
     if(line[0:3] == "REM"):
@@ -155,12 +182,14 @@ def parseLine(line):
         processDuckyScript(line[7:])
     elif(line[0:6] == "LOCALE"):
         loadLocale(line[7:])
+    elif(line[0:5] == "MOUSE"):
+        mouseAction(line[6:])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
 
 def processDuckyScript(duckyScriptPath):
-    f = open(duckyScriptPath,"r",encoding='utf-8')
+    f = open(duckyScriptPath, "r", encoding='utf-8')
     print("Running " + duckyScriptPath)
     previousLine = ""
     duckyScript = f.readlines()
@@ -168,7 +197,7 @@ def processDuckyScript(duckyScriptPath):
         line = line.rstrip()
         if(line[0:6] == "REPEAT"):
             for i in range(int(line[7:])):
-                #repeat the last command
+                # repeat the last command
                 parseLine(previousLine)
                 time.sleep(float(defaultDelay)/1000)
         else:
@@ -183,6 +212,7 @@ def isPinGrounded(pin):
     return (not checkPin.value)
 
 kbd = Keyboard(usb_hid.devices)
+mouse = Mouse(usb_hid.devices)
 layout = KeyboardLayout(kbd)
 
 # sleep at the start to allow the device to be recognized by the host computer
@@ -208,3 +238,5 @@ elif isPinGrounded(GP6):
 else:
     # in setup mode
     print("Update your payload")
+
+processDuckyScript("payload0.dd")
