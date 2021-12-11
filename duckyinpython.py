@@ -238,5 +238,3 @@ elif isPinGrounded(GP6):
 else:
     # in setup mode
     print("Update your payload")
-
-processDuckyScript("payload0.dd")
