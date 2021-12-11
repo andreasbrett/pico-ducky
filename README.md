@@ -1,8 +1,8 @@
 <h1>This is a fork...</h1>
 
-This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). It's close to the original code...
+This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). Additions to the original code...
 
-- providing additions to the Ducky Script language (see below)
+- introducing new commands to the Ducky Script language (see below)
 - allowing to run one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`)
 - allowing to run a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
 
@@ -16,6 +16,13 @@ Changes to the Ducky Script language are:
   - `MOUSE CLICK/PRESS/RELEASE LEFT [RIGHT] [MIDDLE]` - click, press or release one ore more buttons (e.g. `MOUSE PRESS LEFT RIGHT` would keep the left and right buttons pressed until issuing a `MOUSE RELEASE LEFT RIGHT` or `MOUSE RELEASEALL` command)
   - `MOUSE RELEASEALL` - releases all pressed buttons
   - these work great in scenarios where you want to mess with user's ability to e.g. close your shell by moving the mouse or to spookily move the mouse around ever so often
+- activating <strong>psycho-mouse</strong> mode through `PSYCHOMOUSE [CHARS] [RANGE]`
+  - this mode will randomly move the mouse when typing strings from a `STRING $yourstring` command
+  - user won't be able to close your shell by mouse (we all know lusers don't know keyboard shortcuts)
+  - `PSYCHOMOUSE` will activate psycho-mouse mode with default values (chars = 5, range = 250)
+  - `PSYCHOMOUSE 12 300` moves mouse every 12 chars in a range of +/- 300 pixels
+  - `PSYCHOMOUSE OFF` disables psycho-mouse mode
+  - <strong>note:</strong> typing performance reduces by roughly 10% with the default value for `chars=5`
 
 <h1 align="center">pico-ducky</h1>
 

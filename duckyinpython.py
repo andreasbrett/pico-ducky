@@ -7,12 +7,6 @@ import usb_hid
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.mouse import Mouse
 
-# mouse jiggler configuration
-mouseJigglerDelayMin = 1
-mouseJigglerDelayMax = 15
-mouseJigglerMovement = 10
-mouseJigglerLED = True
-
 # comment out these lines for non_US keyboards
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 from adafruit_hid.keycode import Keycode
@@ -28,6 +22,18 @@ import random
 from board import *
 led = digitalio.DigitalInOut(LED)
 led.direction = digitalio.Direction.OUTPUT
+
+
+# mouse jiggler configuration
+mouseJigglerDelayMin = 1
+mouseJigglerDelayMax = 15
+mouseJigglerMovement = 10
+mouseJigglerLED = True
+
+# psycho mouse configuration
+psychoMouseChars = 5
+psychoMouseRange = 250
+
 
 duckyCommands = {
     'WINDOWS': Keycode.WINDOWS, 'GUI': Keycode.GUI,
@@ -134,7 +140,19 @@ def runScriptLine(line):
     kbd.release_all()
 
 def sendString(line):
-    layout.write(line)
+    if psychoMouse:
+        rand = []
+        for i in range(0, 10):
+            rand.append(random.randint(-1 * psychoMouseRange, psychoMouseRange))
+        i = 0
+        pos = 0
+        while pos < len(line):
+            layout.write(line[pos:(pos+psychoMouseChars)])
+            mouse.move(x=rand[i%10], y=rand[(i+1)%10])
+            pos += psychoMouseChars
+            i += 1
+    else:
+        layout.write(line)
 
 def getMouseButtons(line):
     buttons = line.split(" ")
@@ -162,7 +180,7 @@ def mouseAction(line):
         mouse.release_all()
 
 def parseLine(line):
-    global defaultDelay
+    global defaultDelay, psychoMouse, psychoMouseChars, psychoMouseRange
     if(line[0:3] == "REM"):
         # ignore ducky script comments
         pass
@@ -184,6 +202,16 @@ def parseLine(line):
         loadLocale(line[7:])
     elif(line[0:5] == "MOUSE"):
         mouseAction(line[6:])
+    elif(line[0:11] == "PSYCHOMOUSE"):
+        psychoMouse = True
+        params = line.split(" ")
+        if (len(params) > 1):
+            if (params[1] == "OFF"):
+                psychoMouse = False
+            else:
+                psychoMouseChars = int(params[1])
+                if (len(params) > 2):
+                    psychoMouseRange = int(params[2])
     else:
         newScriptLine = convertLine(line)
         runScriptLine(newScriptLine)
@@ -219,6 +247,7 @@ layout = KeyboardLayout(kbd)
 time.sleep(.5)
 
 defaultDelay = 0
+psychoMouse = False
 
 # check GP0/GP1/GP2/GP3/GP4/GP5/GP6 for run mode
 if isPinGrounded(GP0):
