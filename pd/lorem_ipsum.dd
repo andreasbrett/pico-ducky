@@ -1,5 +1,5 @@
 REM open notepad
-IMPORT dd/open_notepad.dd
+IMPORT pd/open_notepad.dd
 REM activate psycho-mouse mode (every 5 chars, range 250)
 PSYCHOMOUSE 5 250
 REM paste in lorem ipsum (500 words)

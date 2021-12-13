@@ -1,8 +1,6 @@
-REM set keyboard locale to DE
-LOCALE DE
 REM wait for pico-ducky to be mounted by Windows
 DELAY 1000
 REM run open_notepad payload
-IMPORT dd/open_notepad.dd
+IMPORT pd/open_notepad.dd
 REM enter some text
-STRING this is payload0.dd
+STRING this is payload3.dd

@@ -1,28 +1,46 @@
 <h1>This is a fork...</h1>
 
-This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). Additions to the original code...
+This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). Apart from major refactoring, additions to the original code are as follows:
 
-- introducing new commands to the Ducky Script language (see below)
-- allowing to run one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`)
-- allowing to run a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
+- introduced new commands to the Ducky Script language (see below)
+- beautified serial output
+  - easier to debug, better to analyze scripts
+  - performance of scripts is now measured
+  - it's easy to compare how much enabling e.g. `PSYCHOMOUSE` mode affects performance (spoiler: roughly 15-20%)
+- separate configuration file to customize your pico-ducky
+  - many hard-coded settings of the original pico-ducky can now be configured
+  - use template `pd\config_default.py` and store it as `pd\config.py` for custom settings
+- allows running one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`)
+- allows running a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
+- includes some basic duckyscripts to get you started in folder `pd`
 
 Changes to the Ducky Script language are:
 
 - importing other payloads through e.g. `IMPORT filename.dd`
-- setting keyboard locale __at runtime__ through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
-- sending mouse commands (movements, wheel action, clicks, presses and releases)
+- setting keyboard locale **at runtime** through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
+- all F-keys can be sent (so also F13-F24)
+- added commands
+  - `RIGHTALT`
+  - `RIGHTCONTROL`
+  - `RIGHTGUI`
+  - `RIGHTSHIFT`
+  - `POWER` (specific to MacOS)
+- sending mouse commands (movements, scrollwheel action, clicks, presses and releases)
   - `MOUSE MOVE $x $y` - moves the mouse pointer
   - `MOUSE WHEEL $amount` - moves the mouse wheel (negative = toward the user, positive = away from the user)
-  - `MOUSE CLICK/PRESS/RELEASE LEFT [RIGHT] [MIDDLE]` - click, press or release one ore more buttons (e.g. `MOUSE PRESS LEFT RIGHT` would keep the left and right buttons pressed until issuing a `MOUSE RELEASE LEFT RIGHT` or `MOUSE RELEASEALL` command)
+  - `MOUSE CLICK/PRESS/RELEASE LEFT [RIGHT] [MIDDLE]` - click, press or release one ore more buttons
+    - `MOUSE CLICK RIGHT` presses and immediately releases the right button
+    - `MOUSE PRESS LEFT RIGHT` keeps the left and right buttons pressed
+    - `MOUSE RELEASE LEFT RIGHT` releases them again
   - `MOUSE RELEASEALL` - releases all pressed buttons
   - these work great in scenarios where you want to mess with user's ability to e.g. close your shell by moving the mouse or to spookily move the mouse around ever so often
 - activating <strong>psycho-mouse</strong> mode through `PSYCHOMOUSE [CHARS] [RANGE]`
-  - this mode will randomly move the mouse when typing strings from a `STRING $yourstring` command
+  - this mode will randomly move the mouse when issuing a `STRING $yourstring` command
   - user won't be able to close your shell by mouse (we all know lusers don't know keyboard shortcuts)
   - `PSYCHOMOUSE` will activate psycho-mouse mode with default values (chars = 5, range = 250)
   - `PSYCHOMOUSE 12 300` moves mouse every 12 chars in a range of +/- 300 pixels
   - `PSYCHOMOUSE OFF` disables psycho-mouse mode
-  - <strong>note:</strong> typing performance reduces by roughly 10% with the default value for `chars=5`
+  - <strong>note:</strong> typing performance reduces by roughly 15-20% with the default values
 
 <h1 align="center">pico-ducky</h1>
 
@@ -46,7 +64,7 @@ Changes to the Ducky Script language are:
 
 Install and have your USB Rubber Ducky working in less than 5 minutes.
 
-1. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). *Updated to 7.0.0
+1. Download [CircuitPython for the Raspberry Pi Pico](https://circuitpython.org/board/raspberry_pi_pico/). \*Updated to 7.0.0
 
 2. Plug the device into a USB port while holding the boot button. It will show up as a removable media device named `RPI-RP2`.
 
@@ -56,35 +74,31 @@ Install and have your USB Rubber Ducky working in less than 5 minutes.
 
 5. Navigate to `lib` in the recently extracted folder and copy `adafruit_hid` to the `lib` folder in your Raspberry Pi Pico.
 
-6. Click [here](https://raw.githubusercontent.com/dbisu/pico-ducky/main/duckyinpython.py), press CTRL + S and save the file as `code.py` in the root of the Raspberry Pi Pico, overwriting the previous file.
+6. Place `boot.py`, `main.py` and folder `pd` in the root of the Raspberry Pi Pico, overwriting previous files.
 
-7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `payload0.dd` on the Pico.
+7. Find a script [here](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Payloads) or [create your own one using Ducky Script](https://github.com/hak5darren/USB-Rubber-Ducky/wiki/Duckyscript) and save it as `pd\payload0.dd` on the Pico.
 
 8. To run this payload connect pin 1 (`GP0`) to pin 3 (`GND`) and re-plug the pico. It will reboot and after half a second, the script will run.
 
+9. To tweak how the pico-ducky works copy `pd\config_default.py` to `pd\config.py` and customize the settings to fit your needs.
+
 ### Run vs Setup mode
 
-Select which payload should be run by grounding either pin 1 (`GP0`), pin 2 (`GP1`), pin 4 (`GP3`), pin 5 (`GP4`) or pin 6 (`GP5`) to the ground pin 3 (`GND`). This will tell pico-ducky which of the 6 payload files to run. The easiest way to do so is by using a jumper wire between those pins as seen below (in this case `GP0` is grounded therefore `payload0.dd` will be run). If neither pin is grounded, pico-ducky will be in setup-mode and execute no payload. You are then free to modify your script without risking injecting any payloads.
+Select which payload should be run by grounding either pin 1 (`GP0`), pin 2 (`GP1`), pin 4 (`GP3`), pin 5 (`GP4`) or pin 6 (`GP5`) to the ground pin 3 (`GND`). This will tell pico-ducky which of the 6 payload files to run. The easiest way to do so is by using a jumper wire between those pins as seen below (in this case `GP0` is grounded therefore `payload0.dd` in folder `pd` will be run). If neither pin is grounded, pico-ducky will be in setup-mode and execute no payload. You are then free to modify your script without risking injecting any payloads.
 
 ![Setup mode with a jumper](images/setup-mode.png)
 
 ### USB enable/disable mode
 
-If you need the pico-ducky to not show up as a USB mass storage device for stealth, follow these instructions.  
-Enter setup mode.  
-Copy boot.py to the root of the pico-ducky.  
-Copy your payload script to the pico-ducky.  
-Disconnect the pico from your host PC.
-Connect a jumper wire between pin 18 and pin 20.
-This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer.  
-Remove the jumper and reconnect to your PC to reprogram.
-The default mode is USB mass storage enabled.   
+If you need the pico-ducky to not show up as a USB mass storage device for stealth, simply ground pins 18 (`GND`) and pin 20 (`GP15`). This will prevent the pico-ducky from showing up as a USB drive when plugged into the target computer. Remove the jumper and reconnect to your PC to reprogram.
+
+By default USB mass storage is enabled.
 
 ![USB enable/disable mode](images/usb-boot-mode.png)
 
 ### Changing Keyboard Layouts
 
-Copied from [Neradoc/Circuitpython_Keyboard_Layouts](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/blob/main/PICODUCKY.md)  
+Copied from [Neradoc/Circuitpython_Keyboard_Layouts](https://github.com/Neradoc/Circuitpython_Keyboard_Layouts/blob/main/PICODUCKY.md)
 
 #### How to use one of these layouts with the pico-ducky repository.
 
@@ -123,19 +137,7 @@ This is what it should look like **if your language is French for example**.
 
 #### Modify the pico-ducky code to use your language file:
 
-At the start of the file comment out these lines:
-
-```py
-from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
-from adafruit_hid.keycode import Keycode
-```
-
-Uncomment these lines:  
-*Replace `LANG` with the letters for your language of choice. The name must match the file (without the py or mpy extension).*
-```py
-from keyboard_layout_win_LANG import KeyboardLayout
-from keycode_win_LANG import Keycode
-```
+Re-configure the locale pico-ducky should use by default in the provided `pd\config_default.py`. You could also dynamically use the `LOCALE` command to change your locale at runtime (e.g. start your duckyscripts with `LOCALE DE` for a german keyboard)
 
 ## Useful links and resources
 
