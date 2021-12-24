@@ -26,19 +26,22 @@ Changes to the Ducky Script language are:
   - `RIGHTSHIFT`
   - `POWER` (specific to MacOS)
 - sending consumer control commands (aka media keys)
-  - `BRIGHTNESS_DECREMENT`
-  - `BRIGHTNESS_INCREMENT`
-  - `EJECT`
-  - `FAST_FORWARD`
-  - `MUTE`
-  - `PLAY_PAUSE`
-  - `RECORD`
-  - `REWIND`
-  - `SCAN_NEXT_TRACK`
-  - `SCAN_PREVIOUS_TRACK`
-  - `STOP`
-  - `VOLUME_DECREMENT`
-  - `VOLUME_INCREMENT`
+  - `CC SEND BRIGHTNESS_DECREMENT`
+  - `CC SEND BRIGHTNESS_INCREMENT`
+  - `CC SEND EJECT`
+  - `CC SEND FAST_FORWARD`
+  - `CC SEND MUTE`
+  - `CC SEND PLAY_PAUSE`
+  - `CC SEND RECORD`
+  - `CC SEND REWIND`
+  - `CC SEND SCAN_NEXT_TRACK`
+  - `CC SEND SCAN_PREVIOUS_TRACK`
+  - `CC SEND STOP`
+  - `CC SEND VOLUME_DECREMENT`
+  - `CC SEND VOLUME_INCREMENT`
+  - to press and later release a media key use the following commands (only one can be pressed at a time!)
+    - `CC PRESS VOLUME_INCREMENT`
+    - `CC RELEASE`
 - sending mouse commands (movements, scrollwheel action, clicks, presses and releases)
   - `MOUSE MOVE $x $y` - moves the mouse pointer
   - `MOUSE WHEEL $amount` - moves the mouse wheel (negative = toward the user, positive = away from the user)
