@@ -6,6 +6,8 @@ import random
 import time
 
 import usb_hid
+from adafruit_hid.consumer_control import ConsumerControl
+from adafruit_hid.consumer_control_code import ConsumerControlCode
 from adafruit_hid.keyboard import Keyboard
 from adafruit_hid.keyboard_layout_us import KeyboardLayoutUS as KeyboardLayout
 from adafruit_hid.keycode import Keycode
@@ -124,6 +126,24 @@ mouseButtons = {
     "LEFT": Mouse.LEFT_BUTTON,
     "RIGHT": Mouse.RIGHT_BUTTON,
     "MIDDLE": Mouse.MIDDLE_BUTTON,
+}
+
+
+# map cc commands to consumercontrolcodes
+consumerControlCommands = {
+    "BRIGHTNESS_DECREMENT": ConsumerControlCode.BRIGHTNESS_DECREMENT,
+    "BRIGHTNESS_INCREMENT": ConsumerControlCode.BRIGHTNESS_INCREMENT,
+    "EJECT": ConsumerControlCode.EJECT,
+    "FAST_FORWARD": ConsumerControlCode.FAST_FORWARD,
+    "MUTE": ConsumerControlCode.MUTE,
+    "PLAY_PAUSE": ConsumerControlCode.PLAY_PAUSE,
+    "RECORD": ConsumerControlCode.RECORD,
+    "REWIND": ConsumerControlCode.REWIND,
+    "SCAN_NEXT_TRACK": ConsumerControlCode.SCAN_NEXT_TRACK,
+    "SCAN_PREVIOUS_TRACK": ConsumerControlCode.SCAN_PREVIOUS_TRACK,
+    "STOP": ConsumerControlCode.STOP,
+    "VOLUME_DECREMENT": ConsumerControlCode.VOLUME_DECREMENT,
+    "VOLUME_INCREMENT": ConsumerControlCode.VOLUME_INCREMENT,
 }
 
 
@@ -280,28 +300,60 @@ def performMouseAction(line):
     if tokens[0] == "MOVE":
         moveX = int(tokens[1])
         moveY = int(tokens[2])
+        print(f"MOUSE {line} (x={moveX}, y={moveY})")
         mouse.move(x=moveX, y=moveY)
 
     # scroll mouse wheel
     elif tokens[0] == "WHEEL":
         amount = int(joinTokens(tokens, 1))
+        print(f"MOUSE {line}")
         mouse.move(wheel=amount)
 
     # click and release one or more mouse buttons
     elif tokens[0] == "CLICK":
-        mouse.click(convertLineToMouseButtons(joinTokens(tokens, 1)))
+        mouse_buttons = convertLineToMouseButtons(joinTokens(tokens, 1))
+        print(f"MOUSE {line} (buttons = {mouse_buttons})")
+        mouse.click(mouse_buttons)
 
-    # presse (and don't release) one or more mouse buttons
+    # press (and don't release) one or more mouse buttons
     elif tokens[0] == "PRESS":
-        mouse.press(convertLineToMouseButtons(joinTokens(tokens, 1)))
+        mouse_buttons = convertLineToMouseButtons(joinTokens(tokens, 1))
+        print(f"MOUSE {line} (buttons = {mouse_buttons})")
+        mouse.press(mouse_buttons)
 
     # release one or more mouse buttons
     elif tokens[0] == "RELEASE":
-        mouse.release(convertLineToMouseButtons(joinTokens(tokens, 1)))
+        mouse_buttons = convertLineToMouseButtons(joinTokens(tokens, 1))
+        print(f"MOUSE {line} (buttons = {mouse_buttons})")
+        mouse.release(mouse_buttons)
 
     # release all mouse buttons
     elif tokens[0] == "RELEASEALL":
+        print(f"MOUSE RELEASEALL")
         mouse.release_all()
+
+
+# perform a consumer control action
+def performConsumerControlAction(line):
+    # split line into tokens (0 = command, 1-x = parameters)
+    tokens = splitToTokens(line)
+
+    # send cc action
+    if tokens[0] == "SEND":
+        consumer_code = consumerControlCommands.get(joinTokens(tokens, 1))
+        print(f"CC {line} (code = {consumer_code})")
+        cc.send(consumer_code)
+
+    # press (and don't release) one or more mouse buttons
+    elif tokens[0] == "PRESS":
+        consumer_code = consumerControlCommands.get(joinTokens(tokens, 1))
+        print(f"CC {line} (code = {consumer_code})")
+        cc.press(consumer_code)
+
+    # release currently  pressed cc (only one can be pressed at a time)
+    elif tokens[0] == "RELEASE":
+        print(f"CC RELEASE")
+        cc.release()
 
 
 # type out provided string
@@ -387,6 +439,10 @@ def processLine(line):
     elif tokens[0] == "MOUSE":
         performMouseAction(joinTokens(tokens, 1))
 
+    # consumer control command
+    elif tokens[0] == "CC":
+        performConsumerControlAction(joinTokens(tokens, 1))
+
     # control psychoMouse mode
     elif tokens[0] == "PSYCHOMOUSE":
         # enable psychoMouse mode
@@ -461,6 +517,7 @@ def isPinGrounded(pin):
 # set up keyboard + mouse
 kbd = Keyboard(usb_hid.devices)
 mouse = Mouse(usb_hid.devices)
+cc = ConsumerControl(usb_hid.devices)
 loadLocale(config["locale"])
 
 # set up LED

@@ -25,6 +25,20 @@ Changes to the Ducky Script language are:
   - `RIGHTGUI`
   - `RIGHTSHIFT`
   - `POWER` (specific to MacOS)
+- sending consumer control commands (aka media keys)
+  - `BRIGHTNESS_DECREMENT`
+  - `BRIGHTNESS_INCREMENT`
+  - `EJECT`
+  - `FAST_FORWARD`
+  - `MUTE`
+  - `PLAY_PAUSE`
+  - `RECORD`
+  - `REWIND`
+  - `SCAN_NEXT_TRACK`
+  - `SCAN_PREVIOUS_TRACK`
+  - `STOP`
+  - `VOLUME_DECREMENT`
+  - `VOLUME_INCREMENT`
 - sending mouse commands (movements, scrollwheel action, clicks, presses and releases)
   - `MOUSE MOVE $x $y` - moves the mouse pointer
   - `MOUSE WHEEL $amount` - moves the mouse wheel (negative = toward the user, positive = away from the user)
