@@ -3,6 +3,8 @@
 # ------------------------------
 
 config = {
+    # label the pico-ducky should receive (used for some payloads to determine drive letter to load/run further payloads from flash)
+    "driveLabel": "_sss",
     # initial sleep to allow device to be recognized by the host computer (in milliseconds)
     "initialSleep": 500,
     # default keyboard locale to use (put corresponding .mpy layout in lib folder)

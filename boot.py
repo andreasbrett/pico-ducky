@@ -14,6 +14,13 @@ except ImportError:
     from pd.config_default import config
 
 
+# change the drive's label
+def changeDriveLabel(name):
+    storage.remount("/", readonly=False)
+    storage.getmount("/").label = name
+    storage.remount("/", readonly=True)
+
+
 # check if provided pin is grounded
 def isPinGrounded(pin):
     checkPin = DigitalInOut(pin)
@@ -25,9 +32,13 @@ def isPinGrounded(pin):
 print("")
 print("Configuration")
 print("--------------------------------")
+print(" > Drive Label  =", config["driveLabel"])
 print(" > disable CDC  =", config["stealth"]["disableCDC"])
 print(" > disable MIDI =", config["stealth"]["disableMIDI"])
 print("--------------------------------")
+
+# change drive label
+changeDriveLabel(config["driveLabel"])
 
 # check GP15 for stealth mode
 if isPinGrounded(GP15):
