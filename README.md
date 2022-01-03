@@ -18,6 +18,10 @@ Changes to the Ducky Script language are:
 
 - importing other payloads through e.g. `IMPORT filename.dd`
 - setting keyboard locale **at runtime** through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
+- blinking LED through e.g.
+  - `BLINK_LED` (blink once with default duration)
+  - `BLINK_LED 250` (blink once for 250ms)
+  - `BLINK_LED 500 3` (blink 3x for 500ms)
 - all F-keys can be sent (so also F13-F24)
 - added commands
   - `RIGHTALT`

@@ -178,13 +178,12 @@ def pickRandomDelay():
 
 
 # blink onboard LED
-def blinkLED(duration, repeats=1):
-    if config["mouseJiggler"]["LED"]["enabled"]:
-        for i in range(repeats):
-            led.value = True
-            delay(duration)
-            led.value = False
-            delay(duration)
+def blinkLED(duration=0.2, repeats=1):
+    for i in range(repeats):
+        led.value = True
+        delay(duration)
+        led.value = False
+        delay(duration)
 
 
 # infinitely jiggle mouse ever so often
@@ -193,7 +192,7 @@ def mouseJigglerLoop():
     if config["mouseJiggler"]["LED"]["startupIndicator"]["enabled"]:
         blinkLED(
             config["mouseJiggler"]["LED"]["startupIndicator"]["duration"] / 1000,
-            config["mouseJiggler"]["LED"]["startupIndicator"]["repetitions"],
+            config["mouseJiggler"]["LED"]["startupIndicator"]["repeats"],
         )
 
     print("")
@@ -221,7 +220,8 @@ def mouseJigglerLoop():
             )
 
             # blink LED
-            blinkLED(config["mouseJiggler"]["LED"]["duration"] / 1000)
+            if config["mouseJiggler"]["LED"]["enabled"]:
+                blinkLED(config["mouseJiggler"]["LED"]["duration"] / 1000)
 
             # determine delay
             timestamp, delay = pickRandomDelay()
@@ -426,6 +426,15 @@ def processLine(line):
         # enable or disable LED otherwise
         else:
             led.value = True if tokens[1].upper() == "ON" else False
+
+    # control the LED
+    elif tokens[0] == "BLINK_LED":
+        if len(tokens) == 1:
+            blinkLED()
+        elif len(tokens) == 2:
+            blinkLED(duration=(float(tokens[1]) / 1000))
+        elif len(tokens) == 3:
+            blinkLED(duration=(float(tokens[1]) / 1000), repeats=float(tokens[2]))
 
     # import another duckyscript payload
     elif tokens[0] == "IMPORT":

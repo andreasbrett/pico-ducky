@@ -48,7 +48,7 @@ config = {
                 # how long to flash the LED (in milliseconds)
                 "duration": 80,
                 # how often to flash the LED
-                "repetitions": 6,
+                "repeats": 6,
             },
         },
     },
