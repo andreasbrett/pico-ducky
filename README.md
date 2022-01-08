@@ -2,66 +2,73 @@
 
 This is a fork of [dbisu's pico-ducky](https://github.com/dbisu/pico-ducky). Apart from major refactoring, additions to the original code are as follows:
 
-- introduced new commands to the Ducky Script language (see below)
-- beautified serial output
-  - easier to debug, better to analyze scripts
-  - performance of scripts is now measured
-  - it's easy to compare how much enabling e.g. `PSYCHOMOUSE` mode affects performance (spoiler: roughly 15-20%)
-- separate configuration file to customize your pico-ducky
-  - many hard-coded settings of the original pico-ducky can now be configured
-  - use template `pd\config_default.py` and store it as `pd\config.py` for custom settings
-- allows running one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`)
-- allows running a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
-- includes some basic duckyscripts to get you started in folder `pd`
+-   introduced new commands to the Ducky Script language (see below)
+-   beautified serial output
+    -   easier to debug, better to analyze scripts
+    -   performance of scripts is now measured
+    -   it's easy to compare how much enabling e.g. `PSYCHOMOUSE` mode affects performance (spoiler: roughly 15-20%)
+-   separate configuration file to customize your pico-ducky
+    -   many hard-coded settings of the original pico-ducky can now be configured
+    -   use template `pd\config_default.py` and store it as `pd\config.py` for custom settings
+-   allows running one of 6 different payloads (by grounding pins `GP0`, `GP1`, `GP2`, `GP3`, `GP4` or `GP5`)
+-   allows running a mouse jiggler when grounding `GP6` (see Hak5 presentation: https://www.youtube.com/watch?v=aZ8u56I3J3I)
+-   includes some basic duckyscripts to get you started in folder `pd`
 
 Changes to the Ducky Script language are:
 
-- importing other payloads through e.g. `IMPORT filename.dd`
-- setting keyboard locale **at runtime** through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
-- blinking LED through e.g.
-  - `BLINK_LED` (blink once with default duration)
-  - `BLINK_LED 250` (blink once for 250ms)
-  - `BLINK_LED 500 3` (blink 3x for 500ms)
-- all F-keys can be sent (so also F13-F24)
-- added commands
-  - `RIGHTALT`
-  - `RIGHTCONTROL`
-  - `RIGHTGUI`
-  - `RIGHTSHIFT`
-  - `POWER` (specific to MacOS)
-- sending consumer control commands (aka media keys)
-  - `CC SEND BRIGHTNESS_DECREMENT`
-  - `CC SEND BRIGHTNESS_INCREMENT`
-  - `CC SEND EJECT`
-  - `CC SEND FAST_FORWARD`
-  - `CC SEND MUTE`
-  - `CC SEND PLAY_PAUSE`
-  - `CC SEND RECORD`
-  - `CC SEND REWIND`
-  - `CC SEND SCAN_NEXT_TRACK`
-  - `CC SEND SCAN_PREVIOUS_TRACK`
-  - `CC SEND STOP`
-  - `CC SEND VOLUME_DECREMENT`
-  - `CC SEND VOLUME_INCREMENT`
-  - to press and later release a media key use the following commands (only one can be pressed at a time!)
-    - `CC PRESS VOLUME_INCREMENT`
-    - `CC RELEASE`
-- sending mouse commands (movements, scrollwheel action, clicks, presses and releases)
-  - `MOUSE MOVE $x $y` - moves the mouse pointer
-  - `MOUSE WHEEL $amount` - moves the mouse wheel (negative = toward the user, positive = away from the user)
-  - `MOUSE CLICK/PRESS/RELEASE LEFT [RIGHT] [MIDDLE]` - click, press or release one ore more buttons
-    - `MOUSE CLICK RIGHT` presses and immediately releases the right button
-    - `MOUSE PRESS LEFT RIGHT` keeps the left and right buttons pressed
-    - `MOUSE RELEASE LEFT RIGHT` releases them again
-  - `MOUSE RELEASEALL` - releases all pressed buttons
-  - these work great in scenarios where you want to mess with user's ability to e.g. close your shell by moving the mouse or to spookily move the mouse around ever so often
-- activating <strong>psycho-mouse</strong> mode through `PSYCHOMOUSE [CHARS] [RANGE]`
-  - this mode will randomly move the mouse when issuing a `STRING $yourstring` command
-  - user won't be able to close your shell by mouse (we all know lusers don't know keyboard shortcuts)
-  - `PSYCHOMOUSE` will activate psycho-mouse mode with default values (chars = 5, range = 250)
-  - `PSYCHOMOUSE 12 300` moves mouse every 12 chars in a range of +/- 300 pixels
-  - `PSYCHOMOUSE OFF` disables psycho-mouse mode
-  - <strong>note:</strong> typing performance reduces by roughly 15-20% with the default values
+-   importing other payloads through e.g. `IMPORT filename.dd`
+-   setting keyboard locale **at runtime** through e.g. `LOCALE DE` (which would load `keyboard_layout_win_de` and `keycode_win_de` from the libs folder).
+-   wait for keyboard LED to be on or off
+    -   `WAITFORLED CAPS_LOCK ON`
+    -   `WAITFORLED NUM_LOCK OFF`
+    -   `WAITFORLED SCROLL_LOCK ON`
+    -   `WAITFORLED COMPOSE ON`
+    -   LED states are polled every 100ms, so also quick key presses are caught
+    -   great to build trigger patterns (e.g. NUM on, NUM off, CAPS on, CAPS off)
+-   blinking LED through e.g.
+    -   `BLINK_LED` (blink once with default duration)
+    -   `BLINK_LED 250` (blink once for 250ms)
+    -   `BLINK_LED 500 3` (blink 3x for 500ms)
+-   all F-keys can be sent (so also F13-F24)
+-   added commands
+    -   `RIGHTALT`
+    -   `RIGHTCONTROL`
+    -   `RIGHTGUI`
+    -   `RIGHTSHIFT`
+    -   `POWER` (specific to MacOS)
+-   sending consumer control commands (aka media keys)
+    -   `CC SEND BRIGHTNESS_DECREMENT`
+    -   `CC SEND BRIGHTNESS_INCREMENT`
+    -   `CC SEND EJECT`
+    -   `CC SEND FAST_FORWARD`
+    -   `CC SEND MUTE`
+    -   `CC SEND PLAY_PAUSE`
+    -   `CC SEND RECORD`
+    -   `CC SEND REWIND`
+    -   `CC SEND SCAN_NEXT_TRACK`
+    -   `CC SEND SCAN_PREVIOUS_TRACK`
+    -   `CC SEND STOP`
+    -   `CC SEND VOLUME_DECREMENT`
+    -   `CC SEND VOLUME_INCREMENT`
+    -   to press and later release a media key use the following commands (only one can be pressed at a time!)
+        -   `CC PRESS VOLUME_INCREMENT`
+        -   `CC RELEASE`
+-   sending mouse commands (movements, scrollwheel action, clicks, presses and releases)
+    -   `MOUSE MOVE $x $y` - moves the mouse pointer
+    -   `MOUSE WHEEL $amount` - moves the mouse wheel (negative = toward the user, positive = away from the user)
+    -   `MOUSE CLICK/PRESS/RELEASE LEFT [RIGHT] [MIDDLE]` - click, press or release one ore more buttons
+        -   `MOUSE CLICK RIGHT` presses and immediately releases the right button
+        -   `MOUSE PRESS LEFT RIGHT` keeps the left and right buttons pressed
+        -   `MOUSE RELEASE LEFT RIGHT` releases them again
+    -   `MOUSE RELEASEALL` - releases all pressed buttons
+    -   these work great in scenarios where you want to mess with user's ability to e.g. close your shell by moving the mouse or to spookily move the mouse around ever so often
+-   activating <strong>psycho-mouse</strong> mode through `PSYCHOMOUSE [CHARS] [RANGE]`
+    -   this mode will randomly move the mouse when issuing a `STRING $yourstring` command
+    -   user won't be able to close your shell by mouse (we all know lusers don't know keyboard shortcuts)
+    -   `PSYCHOMOUSE` will activate psycho-mouse mode with default values (chars = 5, range = 250)
+    -   `PSYCHOMOUSE 12 300` moves mouse every 12 chars in a range of +/- 300 pixels
+    -   `PSYCHOMOUSE OFF` disables psycho-mouse mode
+    -   <strong>note:</strong> typing performance reduces by roughly 15-20% with the default values
 
 <h1 align="center">pico-ducky</h1>
 
@@ -146,9 +153,9 @@ For a language `LANG`, copy the following files from the zip's `lib` folder to t
 **DO NOT** change the names or extensions of the files. Just pick the right ones.  
 Replace `LANG` with the letters for your language of choice.
 
-- `keyboard_layout.py`
-- `keyboard_layout_win_LANG.py`
-- `keycode_win_LANG.py`
+-   `keyboard_layout.py`
+-   `keyboard_layout_win_LANG.py`
+-   `keycode_win_LANG.py`
 
 Don't forget to get [the adafruit_hid library](https://github.com/adafruit/Adafruit_CircuitPython_HID/releases/latest).
 

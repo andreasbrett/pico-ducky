@@ -1,6 +1,14 @@
 # License : GPLv2.0
 # copyright (c) 2021  Dave Bailey
 # Author: Dave Bailey (dbisu, @daveisu)
+#
+# Fork: Andreas Brett @andreasbrett
+#  - major refactoring
+#  - extended duckyscript language
+#  - dynamic locale switching
+#  - mouse and media key injection
+#  - externalized configuration to customize ducky easily
+#  - detailed debugging through serial monitor
 
 import random
 import time
@@ -466,6 +474,22 @@ def processLine(line):
                 config["psychoMouse"]["characters"] = int(tokens[1])
                 if len(tokens) > 2:
                     config["psychoMouse"]["range"] = int(tokens[2])
+
+    elif tokens[0] == "WAITFORLED":
+        ledCodes = {
+            "CAPS_LOCK": Keyboard.LED_CAPS_LOCK,
+            "COMPOSE": Keyboard.LED_COMPOSE,
+            "NUM_LOCK": Keyboard.LED_NUM_LOCK,
+            "SCROLL_LOCK": Keyboard.LED_SCROLL_LOCK,
+        }
+        ledCode = ledCodes[tokens[1].upper()]
+        ledState = tokens[2].upper() == "ON"
+
+        print(f"Waiting for {tokens[1].upper()} LED to be {tokens[2].lower()}...")
+        while True:
+            if kbd.led_on(ledCode) == ledState:
+                break
+            delay(0.1)
 
     # no recognized special command => just run the converted keycodes
     else:
