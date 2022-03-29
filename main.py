@@ -505,9 +505,10 @@ def processDuckyScript(duckyScriptPath, initialCall=True):
 
     previousLine = ""
     f = open(duckyScriptPath, "r", encoding="utf-8")
-    duckyScript = f.readlines()
-    for line in duckyScript:
-
+    numLines = 0
+    for line in f:
+        numLines += 1
+        
         # split line into tokens (0 = command, 1-x = parameters)
         line = line.rstrip()
         tokens = splitToTokens(line)
@@ -527,11 +528,11 @@ def processDuckyScript(duckyScriptPath, initialCall=True):
     stopwatch = time.monotonic() - stopwatch
     if stopwatch > 1:
         print(
-            f" -> Finished {duckyScriptPath}. Processed {len(duckyScript)} lines in {round(stopwatch, 2)} seconds."
+            f" -> Finished {duckyScriptPath}. Processed {numLines} lines in {round(stopwatch, 2)} seconds."
         )
     else:
         print(
-            f" -> Finished {duckyScriptPath}. Processed {len(duckyScript)} lines in {round(1000 * stopwatch, 2)} milliseconds."
+            f" -> Finished {duckyScriptPath}. Processed {numLines} lines in {round(1000 * stopwatch, 2)} milliseconds."
         )
     if initialCall:
         print(
